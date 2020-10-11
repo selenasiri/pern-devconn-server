@@ -34,7 +34,7 @@ router.post('/',
          let user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
 
          if (user.rows.length > 0) {
-             res.status(400).json({ errors: [ { msg: 'User already exists' }] });
+             return res.status(400).json({ errors: [ { msg: 'User already exists' }] });
          }
     // Get users gravatar
          const avatar = gravatar.url(email, {
@@ -57,8 +57,8 @@ router.post('/',
          const payload = {
              user: {
                  id: newUser.rows[0].id,
-                 name: newUser.rows[0].id,
-                 email: newUser.rows[0].id
+                 name: newUser.rows[0].name,
+                 email: newUser.rows[0].email
                  // Including a name and email makes it easier for debugging,
                  // instead of just containing a user id 
              },

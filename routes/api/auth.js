@@ -25,7 +25,7 @@ router.get('/', auth, async (req, res) => {
     }  
 })
    
-// @route   POST api/auth
+// @route   POST api/auth (login)
 // @desc    Authenticate user & get token
 // @access  Public (to get token and make req to private routs)
 router.post('/', 
@@ -42,46 +42,32 @@ router.post('/',
     const { email, password } = req.body;
 
      try {
-    // See if user exists 
-         let result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        // See if user exists 
+         let user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
 
-         if (length === 0) {
-            res.status(401).json({ errors: [ { msg: 'Invalid Credentials' }] });
+         if (user.rows.length === 0) {
+            return res.status(401).json({ errors: [ { msg: 'Invalid Credentials' }] });
          } // 401 => invalid authentication 
-
-         const user = result.rows[0]
-
+     
          //compares an encrypted password (user.password) to  password (defined in const above):
-         const isMatch = await bcrypt.compare(password, user.password);
+         const isMatch = await bcrypt.compare(password, user.rows[0].password);
 
          if (!isMatch) {
-            res.status(401).json({ errors: [ { msg: 'Invalid Credentials' }] });
+            return res.status(401).json({ errors: [ { msg: 'Invalid Credentials' }] });
          }
          
-
-        // Encrypt password
-        const salt = await bcrypt.genSalt(10);
-           
-         const bcryptPassword = await bcrypt.hash(password, salt);
-         
-         let newUser = await pool.query(
-             `INSERT INTO users (name, email, password, avatar) VALUES ($1, $2, $3, $4) 
-             RETURNING *`, [name, email, bcryptPassword, avatar]
-         );
-
-    // Return jsonwebtoken
+        // Return jsonwebtoken
          const payload = {
              user: {
-                 id: newUser.rows[0].id,
-                 name: newUser.rows[0].id,
-                 email: newUser.rows[0].id
+                 id: user.rows[0].id,
+                 name: user.rows[0].name,
+                 email: user.rows[0].email
                  // Including a name and email makes it easier for debugging,
                  // instead of just containing a user id 
              },
          };
 
          const token = jwt.sign(payload,
-             //config.get('jwtSecret'),
              process.env.JWT_SECRET, {
              expiresIn: 3600000,
          });
