@@ -43,17 +43,21 @@ router.post('/',
 
      try {
     // See if user exists 
-         let user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+         let result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
 
-         if (user.rows.length > 0) {
-             res.status(400).json({ errors: [ { msg: 'User already exists' }] });
+         if (length === 0) {
+            res.status(401).json({ errors: [ { msg: 'Invalid Credentials' }] });
+         } // 401 => invalid authentication 
+
+         const user = result.rows[0]
+
+         //compares an encrypted password (user.password) to  password (defined in const above):
+         const isMatch = await bcrypt.compare(password, user.password);
+
+         if (!isMatch) {
+            res.status(401).json({ errors: [ { msg: 'Invalid Credentials' }] });
          }
-    // Get users gravatar
-         const avatar = gravatar.url(email, {
-             s: '200',
-             r: 'pg',
-             d: 'mm' // acts as a default incase user doesn't have an avatar
-         });
+         
 
         // Encrypt password
         const salt = await bcrypt.genSalt(10);
