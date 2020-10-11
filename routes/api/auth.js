@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../../middleware/auth');
+const jwt = require('jsonwebtoken');
+const { check, validationResult } = require('express-validator')
 
 const User = require('../../models/User');
+
 // @route   GET api/auth
-// @desc    Test route
+// @desc    Authenticate user & get token
 // @access  Public
 router.get('/', auth, (req, res) => res.send('Auth route'));
 try {
@@ -12,8 +15,8 @@ try {
     res.json(user);
 } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
-    }
-
-module.exports = router;
+    res.status(500).send('Server Error');  
+    }     
+    
+module.exports = router; 
 

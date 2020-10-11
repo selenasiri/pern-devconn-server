@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { check, validationResult } = require('express-validator')
 
-const jwt = require('jsonwebtoken');
 const pool = require('../../db');
+
 // Inside are established connections ready to happen (pool needs to handle several different people logging in)
 
 // @route   POST api/users
@@ -45,7 +46,7 @@ router.post('/',
 
         // Encrypt password
         const salt = await bcrypt.genSalt(10);
-         
+           
          const bcryptPassword = await bcrypt.hash(password, salt);
          
          let newUser = await pool.query(
