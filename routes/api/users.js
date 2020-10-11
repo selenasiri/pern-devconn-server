@@ -21,8 +21,7 @@ router.post('/',
         'Please enter a password with 6 or more characters'
     ).isLength({ min: 6 })
 ], 
- async (req, res) => {  
-    console.log("ssss ", req.body)  
+ async (req, res) => {   
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() })
@@ -50,7 +49,7 @@ router.post('/',
          const bcryptPassword = await bcrypt.hash(password, salt);
          
          let newUser = await pool.query(
-             `INSERt INTO users (name, email, password, avatar) VALUES ($1, $2, $3, $4) 
+             `INSERT INTO users (name, email, password, avatar) VALUES ($1, $2, $3, $4) 
              RETURNING *`, [name, email, bcryptPassword, avatar]
          );
 

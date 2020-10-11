@@ -1,23 +1,30 @@
 const express = require('express');
-const router = express.Router();
-const auth = require('../../middleware/auth');
+const { check, validationResult } = require('express-validator');
+const bcrypt = require('bcryptjs');
+const gravatar = require('gravatar');
 const jwt = require('jsonwebtoken');
-const { check, validationResult } = require('express-validator')
+const pool = require('../../db');
+const auth = require('../../middleware/auth');
 
-const User = require('../../models/User');
+const router = express.Router();
 
 // @route   GET api/auth
 // @desc    Authenticate user & get token
 // @access  Public
 
-router.get('/', auth, (req, res) => res.send('Auth route'));
-try {
-    const user = await User.findById(req.user.id).select('-password');
-    res.json(user);
-} catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');  
-    }     
+router.get('/', auth, async (req, res) => {
+    try {
+        const user = await pool.query(`SELECT id, name, email, avatar, date FROM users WHERE id = $1`, [
+             req.user.id
+        ]);
+
+        res.json(user.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');  
+    }  
+})
+   
     
 module.exports = router; 
 
