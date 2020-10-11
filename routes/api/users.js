@@ -6,6 +6,7 @@ const { check, validationResult } = require('express-validator')
 
 const jwt = require('jsonwebtoken');
 const pool = require('../../db');
+// Inside are established connections ready to happen (pool needs to handle several different people logging in)
 
 // @route   POST api/users
 // @desc    Register user
