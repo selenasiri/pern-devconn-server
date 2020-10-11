@@ -80,9 +80,31 @@ router.post('/', [auth, [
     if (linkedin) profileFields.social.linkedin = linkedin;
     if (instagram) profileFields.social.instagram = instagram;
 
-    console.log(profileFields.social.twitter);
+    try {
+      let profile = await Profile.findOne({ user: req.user.id });
+      
+      if (profile) {
+        // Update
+        profile = await Profile.findOneAndUpdate(
+          { user: req.user.id },
+          { $set: profileFields },
+          { new: true }
+        );
 
-    res.send('Hello');
+        return res.json(profile);
+      }
+
+      //Create
+      profile = new Profile(profileFields);
+
+      await Profile.save();
+      res.json(profile);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
+  }
+
+
   }
 );
 
